@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="/day1/style.css">
+</head>
+<body>
+    <div class="full_body">
+        <div class="form">
+            <h4>Welcome to your Dashboard!</h4>
+            <p>You have successfully logged in.</p>
+            <div class="user-info">
+                <p><strong>Account Email:</strong> <span id="userEmail">Loading...</span></p>
+                <p><strong>User ID:</strong> <span id="userId">Loading...</span></p>
+            </div>
+            <button id="logout_button" style="background-color: #dc2626;" onclick=handleLogout()>Log Out</button>
+        </div>
+    </div>
+
+    <!-- <script>
+        // Security Check: If there is no token, boot them back to the login page
+        const token = localStorage.getItem('access_token');
+        if (!token) {
+            window.location.href = 'index.html'; // Change 'index.html' to your login page filename if different
+        }
+
+        // Handle Logout
+        document.getElementById('logout_button').addEventListener('click', () => {
+            localStorage.removeItem('access_token'); // Clear the token
+            window.location.href = 'index.html';    // Redirect to login page
+        });
+    </script> -->
+
+     <!-- DASHBOARD JAVASCRIPT CONNECTION -->
+    <script>
+        const API_URL = 'http://localhost:3000';
+
+        // 1. Immediately check if the user has a saved access token
+        const token = localStorage.getItem('access_token');
+
+        // If no token exists, kick the user back to the login page immediately
+        if (!token) {
+            window.location.href = 'index.html';
+        }
+
+        // 2. Fetch the logged-in user's profile data from the backend
+        async function fetchDashboardData() {
+            try {
+                const response = await fetch(`${API_URL}/auth/me`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Update the HTML text with user details from the backend
+                    document.getElementById('userEmail').textContent = data.user.email;
+                    document.getElementById('userId').textContent = data.user.id;
+                } else {
+                    // Token expired or invalid — clear it and force re-login
+                    alert('Session expired. Please log in again.');
+                    localStorage.removeItem('access_token');
+                    window.location.href = 'index.html';
+                }
+            } catch (error) {
+                console.error('Error fetching dashboard data:', error);
+            }
+        }
+
+        // 3. Logout function
+        function handleLogout() {
+            localStorage.removeItem('access_token');
+            window.location.href = 'index.html';
+        }
+
+        // Run the fetch function when the page loads
+        fetchDashboardData();
+    </script>
+</body>
+</html>
